@@ -1,7 +1,7 @@
 {
-    "name": "nfephp-org/sped-da",
+    "name": "vinisz/custom-sped-da",
     "type": "library",
-    "description": "sped-da contêm as classes para criação dos documentos auxiliares referidos no projeto Sped.",
+    "description": "sped-da personalizada contêm as classes para criação dos documentos auxiliares referidos no projeto Sped.",
     "keywords": [
         "nfe",
         "sped",
