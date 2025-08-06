@@ -11,11 +11,10 @@ class Pdf extends Fpdf
     private $aSet="";                                          // grupo A do conjunto de de caracteres legiveis
     private $bSet="";                                          // grupo B do conjunto de caracteres legiveis
     private $cSet="";                                          // grupo C do conjunto de caracteres legiveis
-    private $setFrom = ["A" => 0, "B" => 0, "C" => 0];         // converter de
-    private $setTo = ["A" => 0, "B" => 0, "C" => 0];           // converter para
-    private $jStart = ["A"=> 103, "B"=> 104, "C" => 105];      // Caracteres de seleção do grupo 128
-    private $jSwap = ["A" => 101, "B" => 100, "C" => 99];      // Caracteres de troca de grupo
-    private $angle = 0;
+    private $setFrom;                                          // converter de
+    private $setTo;                                            // converter para
+    private $jStart = ["A"=>103, "B"=>104, "C"=>105];     // Caracteres de seleção do grupo 128
+    private $jSwap = ["A"=>101, "B"=>100, "C"=>99];       // Caracteres de troca de grupo
 
     public function __construct($orientation = 'P', $unit = 'mm', $format = 'A4')
     {
@@ -169,8 +168,7 @@ class Pdf extends Fpdf
         $Aguid="";
         $Bguid="";
         $Cguid="";
-        $len = strlen($code);
-        for ($i=0; $i < $len; $i++) {
+        for ($i=0; $i < strlen($code); $i++) {
             $needle=substr($code, $i, 1);
             $Aguid .= ((strpos($this->aSet, $needle)===false) ? "N" : "O");
             $Bguid .= ((strpos($this->bSet, $needle)===false) ? "N" : "O");
@@ -197,7 +195,7 @@ class Pdf extends Fpdf
                 for ($i=0; $i < $made; $i += 2) {
                     $crypt .= chr(strval(substr($code, $i, 2)));
                 }
-                $jeu = "C";
+                    $jeu = "C";
             } else {
                 $madeA = strpos($Aguid, "N");
                 if ($madeA === false) {
@@ -333,7 +331,7 @@ class Pdf extends Fpdf
         }
         $this->out($op);
     }
-
+    
     /**
      * Desenha o arco para arredondar o canto do retangulo
      * @param   number $x1
@@ -358,7 +356,7 @@ class Pdf extends Fpdf
             )
         );
     }
-
+    
     /**
      * Desenha um retangulo com linhas tracejadas
      * @param   number $x1
@@ -427,7 +425,7 @@ class Pdf extends Fpdf
             $this->rect($xi, $yi, $w, $h);
         }
     }
-
+    
     /**
      * Insere linhas de texto na caixa
      * @param   number  $w
@@ -563,7 +561,7 @@ class Pdf extends Fpdf
         $this->x = $this->lMargin;
         return $nl;
     }
-
+    
     /**
      * Quebra o texto para caber na caixa
      * @param   type $text
@@ -613,7 +611,7 @@ class Pdf extends Fpdf
         $text = rtrim($text);
         return $count;
     }
-
+    
     /**
      * Celula com escala horizontal caso o texto seja muito largo
      * @param   number  $w
@@ -723,7 +721,7 @@ class Pdf extends Fpdf
     {
         $this->cellFit($w, $h, $txt, $border, $ln, $align, $fill, $link, false, false);
     }
-
+    
     /**
      * Celula com espaçamento de caracteres forçado
      * @param   number  $w
@@ -747,7 +745,7 @@ class Pdf extends Fpdf
     ) {
         $this->cellFit($w, $h, $txt, $border, $ln, $align, $fill, $link, false, true);
     }
-
+    
     /**
      * Patch para trabalhar com textos de duplo byte CJK
      * @param   string $s
@@ -807,7 +805,6 @@ class Pdf extends Fpdf
     */
     public function dashedVLine($x, $y, $w, $yfinal, $n)
     {
-        $this->setDrawColor(150, 150, 150);
         $this->setLineWidth($w);
         if ($y > $yfinal) {
             $aux = $yfinal;
@@ -820,7 +817,7 @@ class Pdf extends Fpdf
             $n--;
         }
     }
-
+    
     /**
      * pGetNumLines
      * Obtem o numero de linhas usadas pelo texto usando a fonte especifidada
@@ -836,7 +833,7 @@ class Pdf extends Fpdf
         $n = $this->wordWrap($text, $width - 0.2);
         return $n;
     }
-
+    
     /**
      * pTextBox
      * Cria uma caixa de texto com ou sem bordas. Esta função perimite o alinhamento horizontal
@@ -861,8 +858,6 @@ class Pdf extends Fpdf
      * se falso mantem o tamanho do fonte e usa quantas linhas forem necessárias
      * @param  number  $hmax
      * @param  number  $vOffSet incremento forçado na na posição Y
-     * @param  boolean $fill  Cria um quadrado e preenche o mesmo com a cor determinada no PDF.
-     * Se ativo junto com $border colore o quadrado criado pelo memso.
      * @return number $height Qual a altura necessária para desenhar esta textBox
      */
     public function textBox(
@@ -878,8 +873,7 @@ class Pdf extends Fpdf
         $link = '',
         $force = true,
         $hmax = 0,
-        $vOffSet = 0,
-        $fill = false
+        $vOffSet = 0
     ) {
         $oldY = $y;
         $temObs = false;
@@ -894,19 +888,17 @@ class Pdf extends Fpdf
             //remover espaços desnecessários
             $text = trim($text);
             //converter o charset para o fpdf
-            $text = $this->convertToIso($text);
+            // $text = utf8_decode($text);
+            // $text = mb_convert_encoding($text, 'UTF-8', 'ISO-8859-1');
+            $text = mb_convert_encoding($text, 'ISO-8859-1', 'UTF-8'); 
             //decodifica os caracteres html no xml
             $text = html_entity_decode($text);
         } else {
             $text = (string) $text;
         }
         //desenhar a borda da caixa
-        if ($border && $fill) {
-            $this->roundedRect($x, $y, $w, $h, 0.8, '1234', 'DF');
-        } elseif ($border) {
+        if ($border) {
             $this->roundedRect($x, $y, $w, $h, 0.8, '1234', 'D');
-        } elseif ($fill) {
-            $this->rect($x, $y, $w, $h, 'F');
         }
         //estabelecer o fonte
         $this->setFont($aFont['font'], $aFont['style'], $aFont['size']);
@@ -980,7 +972,7 @@ class Pdf extends Fpdf
         }
         return ($y1 - $y) - $incY;
     }
-
+    
     /**
      * Cria uma caixa de texto com ou sem bordas. Esta função permite o alinhamento horizontal
      * ou vertical do texto dentro da caixa, rotacionando-o em 90 graus, essa função precisa que
@@ -1035,7 +1027,7 @@ class Pdf extends Fpdf
             //remover espaços desnecessários
             $text = trim($text);
             //converter o charset para o fpdf
-            $text = $this->convertToIso($text);
+            $text = utf8_decode($text);
             //decodifica os caracteres html no xml
             $text = html_entity_decode($text);
         } else {
@@ -1117,16 +1109,5 @@ class Pdf extends Fpdf
         //Zerando rotação
         $this->rotate(0, $x, $y);
         return ($y1 - $y) - $incY;
-    }
-
-    /**
-     * Converte os caracteres para ISO-88591.
-     *
-     * @param string $text
-     * @return string
-     */
-    private function convertToIso($text)
-    {
-        return mb_convert_encoding($text, 'ISO-8859-1', ['UTF-8', 'windows-1252']);
     }
 }

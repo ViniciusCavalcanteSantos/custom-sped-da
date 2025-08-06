@@ -42,19 +42,15 @@ class DacteOS extends DaCommon
     protected $seg;
     protected $modal;
     protected $rodo;
-    protected $aereo;
     protected $moto;
     protected $veic;
     protected $ferrov;
     protected $Comp;
-    protected $ObsFisco;
-    protected $ObsCont;
     protected $infNF;
     protected $infNFe;
     protected $compl;
     protected $ICMS;
     protected $imp;
-    protected $infTribFed;
     protected $toma4;
     protected $toma03;
     protected $tpEmis;
@@ -79,18 +75,6 @@ class DacteOS extends DaCommon
     protected $lota;
     protected $formatoChave = "#### #### #### #### #### #### #### #### #### #### ####";
     protected $margemInterna = 0;
-
-    protected $infOutros;
-    protected $ICMSSN;
-    protected $toma;
-    protected $enderToma;
-    protected $xSeg;
-    protected $nApol;
-    protected $respSeg;
-    protected $protCTe;
-    protected $qrCodMDFe;
-    protected $cteProc;
-    protected $wCanhoto;
 
     /**
      * __construct
@@ -125,7 +109,6 @@ class DacteOS extends DaCommon
             $this->infQ = $this->dom->getElementsByTagName("infQ");
             $this->seg = $this->dom->getElementsByTagName("seg")->item(0);
             $this->rodo = $this->dom->getElementsByTagName("rodoOS")->item(0);
-            $this->aereo = $this->dom->getElementsByTagName("aereo")->item(0);
             $this->veic = $this->dom->getElementsByTagName("veic");
             $this->ferrov = $this->dom->getElementsByTagName("ferrov")->item(0);
             // adicionar outros modais
@@ -133,8 +116,6 @@ class DacteOS extends DaCommon
             $this->chaveCTeRef = $this->getTagValue($this->infCteComp, "chave");
             $this->vPrest = $this->dom->getElementsByTagName("vPrest")->item(0);
             $this->Comp = $this->dom->getElementsByTagName("Comp");
-            $this->ObsFisco = $this->dom->getElementsByTagName("ObsFisco");
-            $this->ObsCont = $this->dom->getElementsByTagName("ObsCont");
             $this->infNF = $this->dom->getElementsByTagName("infNF");
             $this->infNFe = $this->dom->getElementsByTagName("infNFe");
             $this->infOutros = $this->dom->getElementsByTagName("infOutros");
@@ -142,24 +123,15 @@ class DacteOS extends DaCommon
             $this->compl = $this->dom->getElementsByTagName("compl");
             $this->ICMS = $this->dom->getElementsByTagName("ICMS")->item(0);
             $this->ICMSSN = $this->dom->getElementsByTagName("ICMSSN")->item(0);
-            $this->infTribFed = $this->dom->getElementsByTagName("infTribFed")->item(0);
             $this->imp = $this->dom->getElementsByTagName("imp")->item(0);
 
             $vTrib = $this->getTagValue($this->imp, "vTotTrib");
             if (!is_numeric($vTrib)) {
                 $vTrib = 0;
             }
-            $vTotTrib = number_format($vTrib, 2, ",", ".");
-            $textoObsCont = "";
-            foreach($this->ObsCont as $obsCont){
-                $textoObsCont .= $this->getTagValue($obsCont, "xTexto").". ";
-            }
-            $textoObsFisco = "";
-            foreach($this->ObsFisco as $obsFisco){
-                $textoObsFisco .= $this->getTagValue($obsFisco, "xTexto").". ";
-            }
-            $this->textoAdic = "Valor aproximado de tributos incidentes sobre o preço deste serviço é de R$ {$vTotTrib}"
-                . "{$textoObsCont} {$textoObsFisco}";
+            $textoAdic = number_format($vTrib, 2, ",", ".");
+            $this->textoAdic = "o valor aproximado de tributos incidentes sobre o preço deste serviço é de R$"
+                .$textoAdic;
             $this->toma = $this->dom->getElementsByTagName("toma")->item(0);
             $this->enderToma = $this->getTagValue($this->toma, "enderToma");
             //modal aquaviário
@@ -289,7 +261,7 @@ class DacteOS extends DaCommon
             $y += 25;
             $x = $xInic;
             $r = $this->impostos($x, $y);
-            $y += 26;
+            $y += 13;
             $x = $xInic;
             $r = $this->observacoes($x, $y);
             $y += 19;
@@ -348,7 +320,7 @@ class DacteOS extends DaCommon
             $y += 25;
             $x = $xInic;
             $r = $this->impostos($x, $y);
-            $y += 26;
+            $y += 13;
             $x = $xInic;
             $r = $this->observacoes($x, $y);
             $y += 15;
@@ -1147,20 +1119,20 @@ class DacteOS extends DaCommon
 
         $y += 3.4;
         $this->pdf->line($x, $y, $w + 1, $y);
-        $texto = 'SITUAÇÃO TRIBUTÁRIA ICMS';
+        $texto = 'SITUAÇÃO TRIBUTÁRIA';
         $aFont = $this->formatPadrao;
         $this->pdf->textBox($x, $y, $w * 0.26, $h, $texto, $aFont, 'T', 'L', 0, '');
 
         $x += $w * 0.26;
         $this->pdf->line($x, $y, $x, $y + 9.5);
-        $texto = 'BASE DE CALCULO ICMS';
+        $texto = 'BASE DE CALCULO';
         $aFont = $this->formatPadrao;
         $this->pdf->textBox($x, $y, $w * 0.14, $h, $texto, $aFont, 'T', 'L', 0, '');
 
         $wCol02=0.18;
         $x += $w * $wCol02;
         $this->pdf->line($x, $y, $x, $y + 9.5);
-        $texto = 'ALÍQUOTA ICMS';
+        $texto = 'ALÍQ ICMS';
         $aFont = $this->formatPadrao;
         $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
 
@@ -1175,6 +1147,13 @@ class DacteOS extends DaCommon
         $texto = '% RED. BC ICMS';
         $aFont = $this->formatPadrao;
         $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
+
+        /*$x += $w * 0.14;
+        $this->pdf->line($x, $y, $x, $y + 9.5);
+        $texto = 'ICMS ST';
+        $aFont = $this->formatPadrao;
+        $this->pdf->textBox($x, $y, $w * 0.14, $h, $texto, $aFont, 'T', 'L', 0, '');
+         * */
 
         $x = $oldX;
         $y = $y + 4;
@@ -1208,99 +1187,32 @@ class DacteOS extends DaCommon
         $x += $w * 0.26;
 
         $texto = !empty($this->ICMS->getElementsByTagName("vBC")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->ICMS, "vBC"), 2, ",", ".") : '0,00';
+            number_format($this->getTagValue($this->ICMS, "vBC"), 2, ",", ".") : '';
         $aFont = $this->formatNegrito;
         $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
         $x += $w * $wCol02;
 
         $texto = !empty($this->ICMS->getElementsByTagName("pICMS")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->ICMS, "pICMS"), 2, ",", ".") : '0,00';
+            number_format($this->getTagValue($this->ICMS, "pICMS"), 2, ",", ".") : '';
         $aFont = $this->formatNegrito;
         $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
         $x += $w * $wCol02;
 
         $texto = !empty($this->ICMS->getElementsByTagName("vICMS")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->ICMS, "vICMS"), 2, ",", ".") : '0,00';
+            number_format($this->getTagValue($this->ICMS, "vICMS"), 2, ",", ".") : '';
         $aFont = $this->formatNegrito;
         $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
         $x += $w * $wCol02;
 
         $texto = !empty($this->ICMS->getElementsByTagName("pRedBC")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->ICMS, "pRedBC"), 2, ",", ".").'%' : '0,00';
+            number_format($this->getTagValue($this->ICMS, "pRedBC"), 2, ",", ".").'%' :'';
         $aFont = $this->formatNegrito;
         $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
 
-        $y += 5.5;
-        $x = $oldX;
-
-        $h = 13;
-        $texto = 'INFORMAÇÕES RELATIVAS AO IMPOSTOS FEDERAIS';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w, $h, $texto, $aFont, 'T', 'C', 1, '');
-
-        $y += 3.4;
-        $this->pdf->line($x, $y, $w + 1, $y);
-        $texto = 'VALOR PIS';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w * 0.26, $h, $texto, $aFont, 'T', 'L', 0, '');
-
-        $x += $w * 0.26;
-        $this->pdf->line($x, $y, $x, $y + 9.5);
-        $texto = 'VALOR COFINS';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w * 0.14, $h, $texto, $aFont, 'T', 'L', 0, '');
-
-        $wCol02=0.18;
-        $x += $w * $wCol02;
-        $this->pdf->line($x, $y, $x, $y + 9.5);
-        $texto = 'VALOR IR';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
-
-        $x += $w * $wCol02;
-        $this->pdf->line($x, $y, $x, $y + 9.5);
-        $texto = 'VALOR INSS';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
-
-        $x += $w * $wCol02;
-        $this->pdf->line($x, $y, $x, $y + 9.5);
-        $texto = 'VALOR CSLL';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
-
-        $x = $oldX;
-        $y = $y + 4;
-
-        $texto = !empty($this->infTribFed->getElementsByTagName("vPIS")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->infTribFed, "vPIS"), 2, ",", ".") : '0,00';
+        /*$x += $w * 0.14;
+        $texto = '';
         $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y, $w * 0.26, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $x += $w * 0.26;
-
-        $texto = !empty($this->infTribFed->getElementsByTagName("vCOFINS")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->infTribFed, "vCOFINS"), 2, ",", ".") : '0,00';
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $x += $w * $wCol02;
-
-        $texto = !empty($this->infTribFed->getElementsByTagName("vIR")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->infTribFed, "vIR"), 2, ",", ".") : '0,00';
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $x += $w * $wCol02;
-
-        $texto = !empty($this->infTribFed->getElementsByTagName("vINSS")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->infTribFed, "vINSS"), 2, ",", ".") : '0,00';
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $x += $w * $wCol02;
-
-        $texto = !empty($this->infTribFed->getElementsByTagName("vCSLL")->item(0)->nodeValue) ?
-            number_format($this->getTagValue($this->infTribFed, "vCSLL"), 2, ",", ".").'%' : '0,00';
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y, $w * $wCol02, $h, $texto, $aFont, 'T', 'L', 0, '');
-
+        $this->pdf->textBox($x, $y, $w * 0.14, $h, $texto, $aFont, 'T', 'L', 0, '');*/
     } //fim da função compValorDACTE
 
     /**
@@ -1409,10 +1321,7 @@ class DacteOS extends DaCommon
 
         $x = $oldX;
         $y = $y + 4;
-        $texto = $this->getTagValue($this->infQ->item(0), "qCarga");
-        if ($this->infQ->item(0) != null) {
-            $texto = number_format($texto, 3, ",", ".");
-        }
+        $texto = number_format($this->getTagValue($this->infQ->item(0), "qCarga"), 3, ",", ".");
         $aFont = $this->formatNegrito;
         $this->pdf->textBox($x, $y, $w * 0.26, $h, $texto, $aFont, 'T', 'L', 0, '');
         $x += $w * 0.26;
@@ -2449,62 +2358,5 @@ class DacteOS extends DaCommon
         // prepare a base64 encoded "data url"
         $pic = 'data://text/plain;base64,' . base64_encode($qrcode);
         $this->pdf->image($pic, $xQr, $yQr, $wQr, $hQr, 'PNG');
-    }
-
-    /**
-     * modalAereo
-     * Monta o campo com os dados do remetente na DACTE. ( retrato  e paisagem  )
-     *
-     * @param number $x Posição horizontal canto esquerdo
-     * @param number $y Posição vertical canto superior
-     * @return number Posição vertical final
-     */
-    protected function modalAereo($x = 0, $y = 0)
-    {
-        $oldX = $x;
-        $oldY = $y;
-        $lotacao = '';
-        if ($this->orientacao == 'P') {
-            $maxW = $this->wPrint;
-        } else {
-            $maxW = $this->wPrint - $this->wCanhoto;
-        }
-        $w = $maxW;
-        $h = 3;
-        $texto = 'DADOS ESPECÍFICOS DO MODAL AÉREO';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w, $h * 3.2, $texto, $aFont, 'T', 'C', 1, '');
-        $y += 3.4;
-        $this->pdf->line($x, $y, $w + 1, $y); // LINHA DE CIMA
-        $texto = 'NÚMERO OPERACIONAL DO CONHECIMENTO AÉREO';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x, $y, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $texto = 'CLASSE DA TARIFA';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x + 50, $y, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $texto = 'CÓDIGO DA TARIFA';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x + 80, $y, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $texto = 'VALOR DA TARIFA';
-        $aFont = $this->formatPadrao;
-        $this->pdf->textBox($x + 110, $y, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $texto = $this->getTagValue($this->aereo, "nOCA");
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y + 3, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $x += $w * 0.23;
-        $this->pdf->line($x, $y, $x, $y + 6); // LINHA APÓS NÚMERO OP. DO CT-E AEREO
-        $texto = $this->getTagValue($this->aereo, "CL");
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y + 3, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $x += 30;
-        $this->pdf->line($x, $y, $x, $y + 6); // LINHA APÓS CLASSE DA TARIFA
-        $texto = $this->getTagValue($this->aereo, "cTar");
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y + 3, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
-        $x += 30;
-        $this->pdf->line($x, $y, $x, $y + 6); // LINHA APÓS COD DA TARIFA
-        $texto = $this->getTagValue($this->aereo, "vTar");
-        $aFont = $this->formatNegrito;
-        $this->pdf->textBox($x, $y + 3, $w * 0.23, $h, $texto, $aFont, 'T', 'L', 0, '');
     }
 }

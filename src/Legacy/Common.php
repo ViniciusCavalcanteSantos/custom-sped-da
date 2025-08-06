@@ -4,6 +4,7 @@ namespace NFePHP\DA\Legacy;
 
 class Common
 {
+
     /**
      * Extrai o valor do node DOM
      * @param  object $theObj Instancia de DOMDocument ou DOMElement
@@ -23,7 +24,7 @@ class Common
             $value = trim($vct->nodeValue);
             if (strpos($value, '&') !== false) {
                 //existe um & na string, então deve ser uma entidade
-                $value = html_entity_decode($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
+                $value = html_entity_decode($value);
             }
             return $extraTextBefore . $value . $extraTextAfter;
         }
@@ -106,15 +107,18 @@ class Common
     public function toTimestamp($input)
     {
         $regex = '^(2[0-9][0-9][0-9])[-](0?[1-9]'
-            . '|1[0-2])[-](0?[1-9]'
-            . '|[12][0-9]'
-            . '|3[01])T(0[0-9]'
-            . '|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]-(01|02|03|04|05):00$';
-
-        if (!preg_match("/$regex/", $input)) {
-            return 0;
+        . '|1[0-2])[-](0?[1-9]'
+        . '|[12][0-9]'
+        . '|3[01])T(0[0-9]'
+        . '|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]-(01|02|03|04|05):00$';
+        try{
+            if (!preg_match("/$regex/", $input)) {
+                return 0;
+            }
+            return \DateTime::createFromFormat("Y-m-d\TH:i:sP", $input)->getTimestamp();
+        }catch(\Exception $e){
+            return '';
         }
-        return \DateTime::createFromFormat("Y-m-d\TH:i:sP", $input)->getTimestamp();
     }
 
     /**
@@ -122,34 +126,14 @@ class Common
      *
      * @param string $input
      *
-     * @return \DateTime|false
+     * @return \DateTime
      */
     public function toDateTime($input)
     {
-        if (PHP_MAJOR_VERSION > 7) {
-            try {
-                return new \DateTime($input);
-            } catch (\Exception $e) {
-                return false;
-            }
-        }
-
-        return $this->toDateTimeLegacy($input);
-    }
-
-    private function toDateTimeLegacy($input)
-    {
-        $quantidadeColons = substr_count($input, ':');
-
-        $format = "Y-m-d\TH:i:sP";
-        if ($quantidadeColons == 2) {
-            $format = "Y-m-d\TH:i:s";
-        }
-
         try {
-            return \DateTime::createFromFormat($format, $input);
+            return \DateTime::createFromFormat("Y-m-d\TH:i:sP", $input);
         } catch (\Exception $e) {
-            return false;
+            return null;
         }
     }
 
@@ -245,69 +229,170 @@ class Common
     {
         switch ($tPag) {
             case '01':
-                $tPagNome = 'Dinheiro';
-                break;
+            $tPagNome = 'Dinheiro';
+            break;
             case '02':
-                $tPagNome = 'Cheque';
-                break;
+            $tPagNome = 'Cheque';
+            break;
             case '03':
-                $tPagNome = 'Cartão de Crédito';
-                break;
+            $tPagNome = 'Cartão de Crédito';
+            break;
             case '04':
-                $tPagNome = 'Cartão de Débito';
-                break;
+            $tPagNome = 'Cartão de Débito';
+            break;
             case '05':
-                $tPagNome = 'Cartão da Loja';
-                break;
+            $tPagNome = 'Crédito Loja';
+            break;
             case '10':
-                $tPagNome = 'Vale Alimentação';
-                break;
+            $tPagNome = 'Vale Alimentação';
+            break;
             case '11':
-                $tPagNome = 'Vale Refeição';
-                break;
+            $tPagNome = 'Vale Refeição';
+            break;
             case '12':
-                $tPagNome = 'Vale Presente';
-                break;
+            $tPagNome = 'Vale Presente';
+            break;
             case '13':
-                $tPagNome = 'Vale Combustível';
-                break;
+            $tPagNome = 'Vale Combustível';
+            break;
             case '14':
-                $tPagNome = 'Duplicata Mercantil';
-                break;
+            $tPagNome = 'Duplicata Mercantil';
+            break;
             case '15':
-                $tPagNome = 'Boleto Bancário';
-                break;
+            $tPagNome = 'Boleto Bancário';
+            break;
             case '16':
-                $tPagNome = 'Depósito Bancário';
-                break;
+            $tPagNome = 'Depósito Bancário';
+            break;
             case '17':
-                $tPagNome = 'PIX Dinâmico';
-                break;
+            $tPagNome = 'Pagamento Instantâneo (PIX)';
+            break;
             case '18':
-                $tPagNome = 'Transferência bancária, Carteira Digit.';
-                break;
+            $tPagNome = 'Transferência bancária, Carteira Digital';
+            break;
             case '19':
-                $tPagNome = 'Programa de fidelidade, Cashback, Crédito Virt.';
-                break;
-            case '20':
-                $tPagNome = 'PIX Estático';
-                break;
-            case '21':
-                $tPagNome = 'Crédito em Loja';
-                break;
-            case '22':
-                $tPagNome = 'Pagamento Eletrônico não Informado - Falha de hardware';
-                break;
+            $tPagNome = 'Programa de fidelidade, Cashback, Crédito Virtual';
+            break;
             case '90':
-                $tPagNome = 'Sem Pagamento';
-                break;
+            $tPagNome = 'Sem Pagamento';
+            break;
             case '99':
-                $tPagNome = 'Outros';
-                break;
+            $tPagNome = 'Outros';
+            break;
             default:
-                $tPagNome = '';
+            $tPagNome = '';
                 // Adicionado default para impressão de notas da 3.10
         }
         return $tPagNome;
+    }
+
+    protected function pTextBox(
+        $x,
+        $y,
+        $w,
+        $h,
+        $text = '',
+        $aFont = array('font' => 'Times', 'size' => 8, 'style' => ''),
+        $vAlign = 'T',
+        $hAlign = 'L',
+        $border = 1,
+        $link = '',
+        $force = true,
+        $hmax = 0,
+        $vOffSet = 0
+    ) {
+        $oldY = $y;
+        $temObs = false;
+        $resetou = false;
+        if ($w < 0) {
+            return $y;
+        }
+        if (is_object($text)) {
+            $text = '';
+        }
+        if (is_string($text)) {
+            //remover espaços desnecessários
+            $text = trim($text);
+            //converter o charset para o fpdf
+            $text = utf8_decode($text);
+            //decodifica os caracteres html no xml
+            $text = html_entity_decode($text);
+        } else {
+            $text = (string) $text;
+        }
+        //desenhar a borda da caixa
+        if ($border) {
+            $this->pdf->RoundedRect($x, $y, $w, $h, 0.8, '1234', 'D');
+        }
+        //estabelecer o fonte
+        $this->pdf->SetFont($aFont['font'], $aFont['style'], $aFont['size']);
+        //calcular o incremento
+        $incY = $this->pdf->fontSize; //tamanho da fonte na unidade definida
+        if (!$force) {
+            //verificar se o texto cabe no espaço
+            $n = $this->pdf->WordWrap($text, $w);
+        } else {
+            $n = 1;
+        }
+        //calcular a altura do conjunto de texto
+        $altText = $incY * $n;
+        //separar o texto em linhas
+        $lines = explode("\n", $text);
+        //verificar o alinhamento vertical
+        if ($vAlign == 'T') {
+            //alinhado ao topo
+            $y1 = $y + $incY;
+        }
+        if ($vAlign == 'C') {
+            //alinhado ao centro
+            $y1 = $y + $incY + (($h - $altText) / 2);
+        }
+        if ($vAlign == 'B') {
+            //alinhado a base
+            $y1 = ($y + $h) - 0.5;
+        }
+        //para cada linha
+        foreach ($lines as $line) {
+            //verificar o comprimento da frase
+            $texto = trim($line);
+            $comp = $this->pdf->getStringWidth($texto);
+            if ($force) {
+                $newSize = $aFont['size'];
+                while ($comp > $w) {
+                    //estabelecer novo fonte
+                    $this->pdf->SetFont($aFont['font'], $aFont['style'], --$newSize);
+                    $comp = $this->pdf->getStringWidth($texto);
+                }
+            }
+            //ajustar ao alinhamento horizontal
+            if ($hAlign == 'L') {
+                $x1 = $x + 0.5;
+            }
+            if ($hAlign == 'C') {
+                $x1 = $x + (($w - $comp) / 2);
+            }
+            if ($hAlign == 'R') {
+                $x1 = $x + $w - ($comp + 0.5);
+            }
+            //escrever o texto
+            if ($vOffSet > 0) {
+                if ($y1 > ($oldY + $vOffSet)) {
+                    if (!$resetou) {
+                        $y1 = $oldY;
+                        $resetou = true;
+                    }
+                    $this->pdf->Text($x1, $y1, $texto);
+                }
+            } else {
+                $this->pdf->Text($x1, $y1, $texto);
+            }
+            //incrementar para escrever o proximo
+            $y1 += $incY;
+            if (($hmax > 0) && ($y1 > ($y + ($hmax - 1)))) {
+                $temObs = true;
+                break;
+            }
+        }
+        return ($y1 - $y) - $incY;
     }
 }
